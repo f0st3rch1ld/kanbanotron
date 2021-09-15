@@ -69,9 +69,6 @@ function purchaseorder_update($qbdb_items_request_array, $vendor, $order_total)
     // Generates new TxnNumber
     $new_PO_TxnNumber = max($temp_TxnNumber_array) + 1;
 
-    // Generates next RefNumber
-    $new_PO_RefNumber = max($temp_RefNumber_array) + 1;
-
     // This statement inserts all of our collected data into the purchaseorder table.
     $purchaseorder_table_insertion = "INSERT INTO purchaseorder (
         TxnID,
@@ -102,6 +99,7 @@ function purchaseorder_update($qbdb_items_request_array, $vendor, $order_total)
         TermsRef_ListID,
         TermsRef_FullName,
         TotalAmount,
+        Memo,
         IsToBePrinted,
         IsToBeEmailed,
         IsManuallyClosed,
@@ -113,9 +111,9 @@ function purchaseorder_update($qbdb_items_request_array, $vendor, $order_total)
         $new_PO_TxnNumber,
         '" . $qbdb_items_request_array[0]['Vendor_ListID'] . "',
         '$vendor',
-        '8000000F-1626707508',
-        'Custom Purchase Order',
-        $new_PO_RefNumber,
+        '8000001F-1319831548',
+        'IG Purchase Order',
+        '',
         '" . $qbdb_items_request_array[0]['VendorAddress_Addr1'] . "',
         '" . $qbdb_items_request_array[0]['VendorAddress_Addr2'] . "',
         '" . $qbdb_items_request_array[0]['VendorAddress_Addr3'] . "',
@@ -137,6 +135,7 @@ function purchaseorder_update($qbdb_items_request_array, $vendor, $order_total)
         '" . $qbdb_items_request_array[0]['TermsRef_ListID'] . "',
         '" . $qbdb_items_request_array[0]['TermsRef_FullName'] . "',
         $order_total,
+        'KNBN" . str_replace('/', '', date('m/d/y')) . "',
         1,
         0,
         0,

@@ -47,7 +47,8 @@ if (file_exists($csv_loc)) {
                 'description' => $data[4],
                 'knbn_qty' => $data[7],
                 'package_qty' => $data[5],
-                'lead_time' => $data[6]
+                'lead_time' => $data[6],
+                'kanban_size' => $data[10],
             );
         }
     }
@@ -142,9 +143,11 @@ if (file_exists($csv_loc)) {
             $converted_lead_time;
             $lowercase_lead_time = strtolower($all_data[$i]['lead_time']);
 
-            if (strpos($lowercase_lead_time, 'weeks') != false || strpos($lowercase_lead_time, 'week') != false || strpos($lowercase_lead_time, 'days') != false || strpos($lowercase_lead_time, 'day') != false || strpos($lowercase_lead_time, '-') == false) {
+            if (strpos($lowercase_lead_time, 'weeks') != false || strpos($lowercase_lead_time, 'week') != false || strpos($lowercase_lead_time, 'days') != false || strpos($lowercase_lead_time, 'day') != false || strpos($lowercase_lead_time, '-') == false || strpos($lowercase_lead_time, 'next day') != false || strpos($lowercase_lead_time, 'next day delivery') != false) {
                 if (strpos($lowercase_lead_time, 'weeks') != false || strpos($lowercase_lead_time, 'week') != false) {
                     $converted_lead_time = intval($lowercase_lead_time) * 7;
+                } elseif (strpos($lowercase_lead_time, 'next day') != false || strpos($lowercase_lead_time, 'next day delivery') != false) {
+                    $converted_lead_time = 1;
                 } else {
                     $converted_lead_time = intval($lowercase_lead_time);
                 }
@@ -163,6 +166,7 @@ if (file_exists($csv_loc)) {
                     'product_setup_product_type' => $product_type_determination,
                     'product_setup_order_method' => $order_method_determination,
                     'product_setup_knbn_uid' => $knbn_uid,
+                    'kanban_information_kanban_size' => $all_data[$i]['kanban_size'],
                     'kanban_information_location' => $all_data[$i]['location'],
                     'kanban_information_vendor' => $all_data[$i]['vendor'],
                     'kanban_information_part_number_group_part_number' => $all_data[$i]['part_number'],

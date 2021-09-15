@@ -54,8 +54,7 @@
             'vendor' => __('Vendor', 'textdomain'),
             'part_number' => __('Part Number', 'textdomain'),
             'vendor_part_number' => __('Vendor Part Number', 'textdomain'),
-            'product_type' => __('Product Type', 'textdomain'),
-            // 'download_kanban_labels' => __('Download Kanban Labels', 'textdomain')
+            'product_type' => __('Product Type', 'textdomain')
         ]);
     });
 
@@ -102,47 +101,33 @@
                 echo 'No Vendor Part Number';
             }
         }
-        // elseif ($column_key == 'download_kanban_labels') {
-        //     echo '<a href="/wp-admin/edit.php?post_type=knbn_action&page=download_kanban_labels&knbn_uids=' . get_post_meta($post_id, 'product_setup_knbn_uid', true) . '" target="blank">Download Kanban Labels</a>';
-        // }
     }, 10, 2);
 
     // // Adds an option for bulk downloading kanban labels
-    // add_filter('bulk_actions-edit-knbn_action', function($bulk_actions) {
-    //     $bulk_actions['bulk_download_kanban_labels'] = __('Download Selected Kanban Labels', 'txtdomain');
-    //     return $bulk_actions;
-    // });
+    add_filter('bulk_actions-edit-knbn_action', function ($bulk_actions) {
+        $bulk_actions['bulk_download_kanban_labels'] = __('Download Selected Kanban Labels', 'txtdomain');
+        return $bulk_actions;
+    });
 
-    // // Bulk Download Functionality
-    // add_filter('handle_bulk_actions-edit-knbn_action', function($redirect_url, $action, $post_ids) {
-    //     if ($action == 'bulk_download_kanban_labels') {
-    //         // empty array to store uid's we need to download
-    //         $knbn_uid_to_dwnld = array();
+    // Bulk Download Functionality
+    add_filter('handle_bulk_actions-edit-knbn_action', function ($redirect_url, $action, $post_ids) {
+        if ($action == 'bulk_download_kanban_labels') {
+            $temp_id_array = array();
+            foreach ($post_ids as $post_id) {
+                array_push($temp_id_array, $post_id);
+            }
+            $redirect_url = add_query_arg('post_ids', json_encode($temp_id_array), admin_url() . 'edit.php?post_type=knbn_action&page=download_kanban_labels');
+        }
+        return $redirect_url;
+    }, 10, 3);
 
-    //         // gotta include the bulk downloader
-    //         include 'admin/components/bulk_download_kanban_labels.php';
-
-    //         // lets add all the uids to the previous array
-    //         foreach ($post_ids as $post_id) {
-    //             $bulk_knbn_uid = get_post_meta($post_id, 'product_setup_knbn_uid', true);
-    //             array_push($knbn_uid_to_dwnld, $bulk_knbn_uid);
-    //         }
-
-    //         // now that we have all the uids, time to generate/download some lábels
-    //         blk_dwnld_lbls($knbn_uid_to_dwnld);
-
-    //         $redirect_url = add_query_arg('bulk_download_kanban_labels', count($post_ids), $redirect_url);
-    //     }
-    //     return $redirect_url;
-    // }, 10, 3);
-
-    // // Gotta tell people that the bulk action has completed
-    // add_action('admin_notices', function() {
-    //     if (!empty($_REQUEST['bulk_download_kanban_labels'])) {
-    //         $num_downloaded = (int) $_REQUEST['bulk_download_kanban_labels'];
-    //         printf('<div id="message" class="updated notice is-dismissable"><p>' . __('Generated and Downloaded %d Kanban Labels.', 'txtdomain') . '</p></div>', $num_downloaded);
-    //     }
-    // });
+    // Gotta tell people that the bulk action has completed (If Redirected)
+    add_action('admin_notices', function () {
+        if (!empty($_REQUEST['bulk_download_kanban_labels'])) {
+            $num_downloaded = (int) $_REQUEST['bulk_download_kanban_labels'];
+            printf('<div id="message" class="updated notice is-dismissable"><p>' . __('Generated and Downloaded %d Kanban Label Sets.', 'txtdomain') . '</p></div>', $num_downloaded);
+        }
+    });
 
     // Adds an option page for importing kanbans
 
@@ -216,5 +201,50 @@
     {
         wp_enqueue_script('knbn_admin.js', plugin_dir_url(__FILE__) . 'admin/js/knbn_admin.js', array('jquery'), false, true);
 
+        wp_enqueue_script('qrcode.js', plugin_dir_url(__FILE__) . 'admin/js/qrcode.js', array('jquery'), false, false);
+
+        wp_enqueue_script('dom-tom-image.js', plugin_dir_url(__FILE__) . 'admin/node_modules/dom-to-image/src/dom-to-image.js', array('jquery'), false, false);
+
+        wp_enqueue_script('FileSaver.js', plugin_dir_url(__FILE__) . 'admin/node_modules/file-saver/src/FileSaver.js', array('jquery'), false, false);
+
+        wp_enqueue_script('jszip.js', plugin_dir_url(__FILE__) . 'admin/node_modules/jszip/dist/jszip.js', array('jquery'), false, false);
+
         wp_enqueue_style('admin.css', plugin_dir_url(__FILE__) . 'admin/admin.css', false, false);
+    }
+
+    // Code for adding extra fields to user's profile section.
+    add_action('show_user_profile', 'enable_kanbanotron_access');
+    add_action('edit_user_profile', 'enable_kanbanotron_access');
+
+    function enable_kanbanotron_access($user)
+    { ?>
+     <h3>Kanbanotron Access</h3>
+     <table class="form-table">
+         <tr>
+             <th><label for="check_kanbanotron_access">Enable Kanbanotron Access</label></th>
+             <td>
+                 <?php
+                    // get dropdown saved value
+                    $kanbanotron_status = get_the_author_meta('check_kanbanotron_access', $user->ID);
+                    ?>
+                 <!-- Employee Kanbanotron Access -->
+                 <select name="check_kanbanotron_access" id="check_kanbanotron_access">
+                     <option value="disabled" <?php if ($kanbanotron_status == "disabled") : ?> selected="selected" <?php endif; ?>>Disabled</option>
+                     <option value="enabled" <?php if ($kanbanotron_status == "enabled") : ?> selected="selected" <?php endif; ?>>Enabled</option>
+                 </select>
+                 <!-- /Employee Kanbanotron Access -->
+             </td>
+         </tr>
+     </table>
+ <?php }
+
+    add_action('personal_options_update', 'save_kanbanotron_profile_fields');
+    add_action('edit_user_profile_update', 'save_kanbanotron_profile_fields');
+
+    function save_kanbanotron_profile_fields($user_id)
+    {
+        if (!current_user_can('edit_user', $user_id)) {
+            return false;
+        }
+        update_user_meta($user_id, 'check_kanbanotron_access', $_POST['check_kanbanotron_access']);
     }

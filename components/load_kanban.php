@@ -14,22 +14,6 @@ if (array_key_exists('xhttp', $_REQUEST)) {
     include plugin_dir_path(__FILE__) . '../db/qb_db/purchaseorder_request.php';
 }
 
-retrieve_po_data();
-// purchaseorder_request referance
-
-// --$purchaseorder_table_data_array;
-// ----TxnID
-// ----TimeCreated
-// ----VendorRef_FullName
-// ----Memo
-
-// --$purchaseorderlineret_table_data_array;
-// ----ItemRef_ListID
-// ----ItemRef_FullName
-// ----Description
-// ----Quantity
-// ----PARENT_IDKEY
-
 knbn_info_request($knbn_uid);
 
 qbdb_item_request($knbn_vendor_part_number);
@@ -41,11 +25,7 @@ qbdb_item_request($knbn_vendor_part_number);
 
 $knbn_on_order = FALSE;
 
-for ($i = 0; count($purchaseorderlineret_table_data_array) > $i; $i++) {
-    if ($qbdb_ListID == $purchaseorderlineret_table_data_array[$i]['ItemRef_ListID']) {
-        $knbn_on_order = TRUE;
-    }
-} ?>
+?>
 
 <!-- kanban search container -->
 <div id="knbn_uid-form">
@@ -77,6 +57,12 @@ for ($i = 0; count($purchaseorderlineret_table_data_array) > $i; $i++) {
                 <td><?php echo $knbn_description; ?></td>
             </tr>
         <?php endif; ?>
+        <?php if ($knbn_quantity) : ?>
+            <tr>
+                <th>Kanban Quantity (Blue / Red Bins)</th>
+                <td><?php echo $knbn_quantity; ?></td>
+            </tr>
+        <?php endif; ?>
         <?php if ($knbn_package_quantity) : ?>
             <tr>
                 <th>Package Quantity</th>
@@ -87,18 +73,6 @@ for ($i = 0; count($purchaseorderlineret_table_data_array) > $i; $i++) {
             <tr>
                 <th>Reorder Quantity</th>
                 <td><?php echo $knbn_reorder_quantity; ?></td>
-            </tr>
-        <?php endif; ?>
-        <?php if ($knbn_blue_bin_quantity) : ?>
-            <tr>
-                <th>Blue Quantity</th>
-                <td><?php echo $knbn_blue_bin_quantity; ?></td>
-            </tr>
-        <?php endif; ?>
-        <?php if ($knbn_red_bin_quantity) : ?>
-            <tr>
-                <th>Red Quantity</th>
-                <td><?php echo $knbn_red_bin_quantity; ?></td>
             </tr>
         <?php endif; ?>
         <tr>
@@ -122,16 +96,10 @@ for ($i = 0; count($purchaseorderlineret_table_data_array) > $i; $i++) {
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($knbn_dept_location) : ?>
+        <?php if ($knbn_location) : ?>
             <tr>
                 <th>Location</th>
-                <td><?php echo $knbn_dept_location; ?></td>
-            </tr>
-        <?php endif; ?>
-        <?php if ($knbn_dept_cell) : ?>
-            <tr>
-                <th>Cell</th>
-                <td><?php echo $knbn_dept_cell; ?></td>
+                <td><?php echo $knbn_location; ?></td>
             </tr>
         <?php endif; ?>
         <?php if ($knbn_notes) : ?>
@@ -171,9 +139,15 @@ for ($i = 0; count($purchaseorderlineret_table_data_array) > $i; $i++) {
 
     <?php if ($knbn_external_url) : ?>
         <a href="<?php echo $knbn_external_url; ?>" target="_blank">Click to order from <?php echo $knbn_vendor; ?> <i class="far fa-plus-square"></i></a>
-    <?php elseif ($knbn_external_yn == 'external' && $knbn_order_method == 'generated-po') : ?>
-        <button onclick="addToPO('<?php echo $knbn_uid; ?>', document.getElementById('order-selection').value)">Add to PO <i class="far fa-plus-square"></i></button>
+    <?php elseif ($knbn_external_yn == 'external' && $knbn_order_method == 'generated-po' && $knbn_reorder_quantity) : ?>
+        <div class="group">
+            <!-- <a href="/kanbanotron/?on_order_ov=1">View On-Order List</a> -->
+            <button onclick="addToPO('<?php echo $knbn_uid; ?>', document.getElementById('order-selection').value)">Add to PO <i class="far fa-plus-square"></i></button>
+        </div>
     <?php elseif ($knbn_external_yn == 'internal') : ?>
-        <button onclick="">Send to Scheduler <i class="far fa-plus-square"></i></button>
+        <div class="group">
+            <!-- <a href="/kanbanotron/?on_order_ov=1">View On-Order List</a> -->
+            <button onclick="">Send to Scheduler <i class="far fa-plus-square"></i></button>
+        </div>
     <?php endif; ?>
 </div>

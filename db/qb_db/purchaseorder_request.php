@@ -22,6 +22,7 @@ function retrieve_po_data()
     // Assigns request data to an array
     if ($purchaseorder_request_result->num_rows > 0) {
         while ($row = $purchaseorder_request_result->fetch_assoc()) {
+            // if (preg_match('/^[a-z]{2}[0-9]{4}$/', strtolower($row['Memo']))) {}
             $temp_po_array = array(
                 'TxnID' => $row['TxnID'],
                 'TimeCreated' => $row['TimeCreated'],
@@ -33,15 +34,15 @@ function retrieve_po_data()
         }
     }
 
-    // echo var_dump($purchaseorder_table_data_array);
-
     // Request from purchaseorderlineret table
-    $purchaseorderlineret_request = "SELECT ItemRef_ListID, ItemRef_FullName, Description, Quantity, PARENT_IDKEY FROM purchaseorderlineret";
+    $purchaseorderlineret_request = "SELECT ItemRef_ListID, ItemRef_FullName, Description, Quantity, PARENT_IDKEY FROM purchaseorderlineret WHERE Amount > 0 AND Rate > 0 AND ItemRef_ListID";
     $purchaseorderlineret_request_result = $conn->query($purchaseorderlineret_request);
 
     // Assigns request data to an array
     if ($purchaseorder_request_result->num_rows > 0) {
+        $temp_po_ret_items_array = array();
         while ($row = $purchaseorderlineret_request_result->fetch_assoc()) {
+            if ($row['ItemRef_FullName'] != 'ibt online' && $row['Description'] != 'ibt online' && $row['Quantity'] != 'ibt online') {}
             $temp_po_items_array = array(
                 'ItemRef_ListID' => $row['ItemRef_ListID'],
                 'ItemRef_FullName' => $row['ItemRef_FullName'],
@@ -49,11 +50,16 @@ function retrieve_po_data()
                 'Quantity' => $row['Quantity'],
                 'PARENT_IDKEY' => $row['PARENT_IDKEY']
             );
-            array_push($purchaseorderlineret_table_data_array, $temp_po_items_array);
+            array_push($temp_po_ret_items_array, $temp_po_items_array);
+        }
+        for ($i = 0; count($purchaseorder_table_data_array) > $i; $i++) {
+            foreach ($temp_po_ret_items_array as $value) {
+                if ($value['PARENT_IDKEY'] == $purchaseorder_table_data_array[$i]['TxnID']) {
+                    array_push($purchaseorderlineret_table_data_array, $value);
+                }
+            }
         }
     }
-
-    // echo var_dump($purchaseorderlineret_table_data_array);
 
     $conn->close();
 }

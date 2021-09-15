@@ -133,6 +133,6 @@ foreach ($vendors as $vendor) : ?>
 
 <?php endforeach; ?>
 
-<input type="submit" name="knbn-all-po-submit" id="knbn-all-po-submit" value="Submit All Purchase Orders" form="" />
+<!-- <input type="submit" name="knbn-all-po-submit" id="knbn-all-po-submit" value="Submit All Purchase Orders" form="" /> -->
 
 <?php $conn->close(); ?>

@@ -2,7 +2,7 @@
 
 $qbdb_vendor_ListID;
 $qbdb_vendor_isActive;
-$qbdb_vendor_CompanyName;
+$qbdb_vendor_Name;
 $qbdb_vendor_FirstName;
 $qbdb_vendor_MiddleName;
 $qbdb_vendor_LastName;
@@ -34,7 +34,7 @@ function qbdb_vendor_request($passed_vendor_name)
     // Quickbooks database connection
     include 'qb_data_connection.php';
 
-    $qbdb_data_request = "SELECT ListID, Name, isActive, FirstName, MiddleName, LastName, VendorAddress_Addr1, VendorAddress_Addr2, VendorAddress_Addr3, VendorAddress_Addr4, VendorAddress_Addr5, VendorAddress_City, VendorAddress_State, VendorAddress_PostalCode, VendorAddress_Country, VendorAddress_Note, ShipAddress_Addr1, ShipAddress_Addr2, ShipAddress_Addr3, ShipAddress_Addr4, ShipAddress_Addr5, ShipAddress_City, ShipAddress_State, ShipAddress_PostalCode, ShipAddress_Country, ShipAddress_Note, TermsRef_ListID, TermsRef_Fullname FROM vendor WHERE CompanyName='" . $passed_vendor_name . "'";
+    $qbdb_data_request = "SELECT ListID, Name, isActive, FirstName, MiddleName, LastName, VendorAddress_Addr1, VendorAddress_Addr2, VendorAddress_Addr3, VendorAddress_Addr4, VendorAddress_Addr5, VendorAddress_City, VendorAddress_State, VendorAddress_PostalCode, VendorAddress_Country, VendorAddress_Note, ShipAddress_Addr1, ShipAddress_Addr2, ShipAddress_Addr3, ShipAddress_Addr4, ShipAddress_Addr5, ShipAddress_City, ShipAddress_State, ShipAddress_PostalCode, ShipAddress_Country, ShipAddress_Note, TermsRef_ListID, TermsRef_Fullname FROM vendor WHERE Name='" . $passed_vendor_name . "'";
     $qbdb_data_result = $conn->query($qbdb_data_request);
 
     if ($qbdb_data_result->num_rows > 0) {
@@ -42,7 +42,7 @@ function qbdb_vendor_request($passed_vendor_name)
             // globals - so we can set their values
             global $qbdb_vendor_ListID;
             global $qbdb_vendor_isActive;
-            global $qbdb_vendor_CompanyName;
+            global $qbdb_vendor_Name;
             global $qbdb_vendor_FirstName;
             global $qbdb_vendor_MiddleName;
             global $qbdb_vendor_LastName;
@@ -71,7 +71,7 @@ function qbdb_vendor_request($passed_vendor_name)
 
             $qbdb_vendor_ListID = $row['ListID'];
             $qbdb_vendor_isActive = $row['isActive'];
-            $qbdb_vendor_CompanyName = $row['CompanyName'];
+            $qbdb_vendor_Name = $row['Name'];
             $qbdb_vendor_FirstName = $row['FirstName'];
             $qbdb_vendor_MiddleName = $row['MiddleName'];
             $qbdb_vendor_LastName = $row['LastName'];
